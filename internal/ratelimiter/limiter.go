@@ -1,4 +1,4 @@
-package raetlimiter
+package ratelimiter
 
 type Limiter interface {
 	Allow(key string) bool
