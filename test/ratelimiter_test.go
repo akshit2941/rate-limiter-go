@@ -48,11 +48,11 @@ func TestRefillOverTIme(t *testing.T) {
 		t.Fatalf("first request should be allowed")
 	}
 
-	if !limiter.Allow("user-1") {
+	if limiter.Allow("user-1") {
 		t.Fatalf("second request should be rejected bcoz of unsufficient token")
 	}
 
-	time.Sleep(1100 * time.Millisecond)
+	clock.Advance(1 * time.Second)
 
 	//this should allow
 	if !limiter.Allow("user-1") {
