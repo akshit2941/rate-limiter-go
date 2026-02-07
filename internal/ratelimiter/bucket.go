@@ -45,3 +45,26 @@ func (b *Bucket) allow(now time.Time) bool {
 	}
 	return false
 }
+
+func (b *Bucket) allowWithResult(now time.Time) Result {
+	b.refill(now)
+
+	result := Result{
+		Limit:     int(b.capacity),
+		Remaining: int(b.tokens),
+	}
+
+	if b.tokens >= 1 {
+		b.tokens -= 1
+		result.Allowed = true
+		result.Remaining = int(b.tokens)
+		return result
+	}
+
+	result.Allowed = false
+
+	secondsUntilNext := (1 - b.tokens) / b.refillRate
+	result.RetryAfter = time.Duration(secondsUntilNext * float64(time.Second))
+
+	return result
+}

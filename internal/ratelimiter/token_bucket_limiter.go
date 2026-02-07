@@ -12,8 +12,9 @@ func NewTokenBucketLimiter(store Store, clock Clock) *TokenBucketLimiter {
 	}
 }
 
-func (l *TokenBucketLimiter) Allow(key string) bool {
+func (l *TokenBucketLimiter) Allow(key string) Result {
 	bucket := l.store.Get(key)
+	now := l.clock.Now()
 
-	return bucket.allow(l.clock.Now())
+	return bucket.allowWithResult(now)
 }

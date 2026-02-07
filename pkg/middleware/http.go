@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"rate-limiter-go/internal/ratelimiter"
+	"strconv"
 )
 
 func RateLimitMiddleware(limiter ratelimiter.Limiter) func(handler http.Handler) http.Handler {
@@ -15,9 +16,17 @@ func RateLimitMiddleware(limiter ratelimiter.Limiter) func(handler http.Handler)
 				apiKey = "anonymous"
 			}
 
-			allowed := limiter.Allow(apiKey)
+			result := limiter.Allow(apiKey)
 
-			if !allowed {
+			w.Header().Set("X-RateLimit-Limit", strconv.Itoa(result.Limit))
+			w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(result.Remaining))
+
+			if !result.Allowed {
+				w.Header().Set(
+					"Retry-After",
+					strconv.Itoa(int(result.RetryAfter.Seconds())),
+				)
+
 				w.WriteHeader(http.StatusTooManyRequests)
 
 				response := map[string]string{
