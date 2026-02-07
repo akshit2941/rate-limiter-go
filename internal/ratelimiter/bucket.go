@@ -19,13 +19,15 @@ func NewBucket(capacity, refillRate float64) *Bucket {
 }
 
 func (b *Bucket) refill(now time.Time) {
-	elapsed := now.Sub(b.lastRefill).Seconds()
+	elapsed := now.Sub(b.lastRefill)
 
-	if elapsed <= 0 {
+	if elapsed < time.Second {
 		return
 	}
 
-	b.tokens += elapsed * b.refillRate
+	seconds := elapsed.Seconds()
+
+	b.tokens += seconds * b.refillRate
 
 	if b.tokens > b.capacity {
 		b.tokens = b.capacity
